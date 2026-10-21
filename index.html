@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ยุทธ</title>
+    <!-- Tailwind CSS for clean styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- QRCode.js Library to generate QR Code on the fly -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Google Fonts for modern Thai typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between items-center p-6 select-none relative overflow-hidden">
+
+    <!-- Top decorative accent -->
+    <div class="w-full max-w-sm flex justify-center opacity-30 pt-4">
+        <div class="h-1 w-12 bg-indigo-500 rounded-full"></div>
+    </div>
+
+    <!-- Main Content: Centered Text -->
+    <main class="flex-1 flex items-center justify-center my-auto">
+        <h1 class="text-7xl sm:text-9xl font-semibold tracking-wider text-slate-100 drop-shadow-2xl transition-all duration-300 hover:scale-105 hover:text-indigo-400 cursor-default">
+            ยุทธ
+        </h1>
+    </main>
+
+    <!-- Interactive Tools: Share & QR Code -->
+    <footer class="w-full max-w-xs flex flex-col items-center gap-3 pb-4 z-10">
+        <div class="flex gap-2 w-full">
+            <!-- Copy Link Button -->
+            <button id="copyBtn" onclick="copyCurrentUrl()" class="flex-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white py-2.5 px-4 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <span id="copyBtnText">คัดลอกลิงก์</span>
+            </button>
+
+            <!-- Show QR Code Button -->
+            <button onclick="toggleQrModal(true)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white p-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center shadow-lg active:scale-95" title="แสดง QR Code">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                </svg>
+            </button>
+        </div>
+    </footer>
+
+    <!-- QR Code Modal Popup -->
+    <div id="qrModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4 transition-opacity duration-300 opacity-0" onclick="if(event.target === this) toggleQrModal(false)">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col items-center gap-4 max-w-xs w-full shadow-2xl transform transition-transform duration-300 scale-95">
+            <div class="flex justify-between items-center w-full">
+                <h3 class="text-sm font-semibold text-slate-200">QR Code สำหรับสแกน</h3>
+                <button onclick="toggleQrModal(false)" class="text-slate-400 hover:text-white p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- QR Code Render Box -->
+            <div id="qrcode" class="bg-white p-3 rounded-xl flex items-center justify-center"></div>
+            
+            <p class="text-xs text-slate-400 text-center">สแกนด้วยกล้องมือถือเพื่อเปิดหน้านี้</p>
+        </div>
+    </div>
+
+    <script>
+        // Copy link functionality
+        function copyCurrentUrl() {
+            const url = window.location.href;
+            
+            // Fallback copy execution for frames
+            const tempInput = document.createElement('input');
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            // Update button label feedback
+            const btnText = document.getElementById('copyBtnText');
+            const originalText = btnText.innerText;
+            btnText.innerText = 'คัดลอกเรียบร้อย!';
+            setTimeout(() => {
+                btnText.innerText = originalText;
+            }, 2000);
+        }
+
+        // Toggle QR Code Modal
+        let qrGenerated = false;
+        function toggleQrModal(show) {
+            const modal = document.getElementById('qrModal');
+            if (show) {
+                if (!qrGenerated) {
+                    new QRCode(document.getElementById("qrcode"), {
+                        text: window.location.href,
+                        width: 180,
+                        height: 180,
+                        colorDark: "#020617",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                    qrGenerated = true;
+                }
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    modal.children[0].classList.remove('scale-95');
+                }, 10);
+            } else {
+                modal.classList.add('opacity-0');
+                modal.children[0].classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.remove('flex');
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+        }
+    </script>
+</body>
+</html>
